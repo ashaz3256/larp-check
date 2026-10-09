@@ -1,0 +1,53 @@
+:root{
+  --bg:#ecebf3; --paper:#fbfaff; --ink:#191533; --muted:#655f85; --line:#d3d0e3;
+  --accent:#d6187a; --accent-ink:#ffffff; --real:#0d8a6a; --mid:#b97a00; --cap:#d6187a;
+  --display:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root{
+  --bg:#131022; --paper:#1d1933; --ink:#f1eeff; --muted:#a39dc4; --line:#353058;
+  --accent:#ff5aa8; --accent-ink:#1a0711; --real:#3fd6ac; --mid:#f2b63c; --cap:#ff5aa8; color-scheme:dark } }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--body);padding:28px 16px 48px}
+.wrap{max-width:620px;margin-inline:auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-direction:column;gap:6px}
+.brand{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(2.3rem,9vw,3.6rem)/.95 var(--display);letter-spacing:-.03em;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:0;max-width:46ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:12px}
+label{font:500 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+textarea{width:100%;min-height:120px;resize:vertical;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:12px;font:400 16px/1.45 var(--body)}
+textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:none;border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:5px 11px;font:500 13px/1.2 var(--body);cursor:pointer}
+.chip:hover{color:var(--ink);border-color:var(--ink)}
+.go{background:var(--accent);color:var(--accent-ink);border:0;border-radius:4px;padding:12px 20px;font:800 1.05rem/1 var(--display);cursor:pointer}
+.go:hover{filter:brightness(1.08)} .go:disabled{opacity:.6;cursor:wait}
+.go.link{text-decoration:none;text-align:center;align-self:center}
+.count{font:500 12px/1 var(--mono);color:var(--muted)}
+.dial{display:grid;place-items:center;position:relative}
+.dial svg{width:min(100%,340px);height:auto;display:block}
+.track{stroke:var(--line)} .fill{stroke:var(--tone);transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
+.needle{stroke:var(--ink);transform-origin:160px 160px;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.hub{fill:var(--ink)} .tick{fill:var(--muted);font:500 11px var(--mono)}
+.score{position:absolute;bottom:22%;font:700 clamp(2.4rem,11vw,3.4rem)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tone)}
+.score small{font-size:.35em;color:var(--muted)}
+.result{--tone:var(--mid)} .result[data-tone="real"]{--tone:var(--real)} .result[data-tone="cap"]{--tone:var(--cap)}
+.verdict{font:800 clamp(1.5rem,6vw,2.1rem)/1.05 var(--display);letter-spacing:-.02em;margin:0;text-align:center;text-wrap:balance}
+.roast{margin:0 auto;text-align:center;max-width:48ch}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;border-top:1px dashed var(--line);padding-top:14px}
+.cols > div{min-width:0}
+.cols h2{font:500 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;margin:0 0 8px;color:var(--muted)}
+.cols ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.note{font:500 12px/1.4 var(--mono);color:var(--muted);text-align:center;margin:0}
+.ad{border:1px dashed var(--line);border-radius:6px;padding:18px;text-align:center;color:var(--muted);font:500 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.ghost{background:none;border:1px solid var(--line);color:var(--ink);border-radius:4px;padding:10px 16px;font:600 14px/1 var(--body);cursor:pointer;align-self:center}
+.ghost:hover{border-color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.fill,.needle{transition:none}}
+.photo{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.photo .ghost{align-self:auto}
+.thumb{display:flex;align-items:center;gap:8px}
+.thumb img{width:56px;height:56px;object-fit:cover;border-radius:4px;border:1px solid var(--line)}
+.fine{font-size:12px;line-height:1.4;color:var(--muted);margin:0}
