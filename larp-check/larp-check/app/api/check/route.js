@@ -24,21 +24,28 @@ ${t}
 // Which AI is switched on. A Groq key wins if both are set (it is the free one).
 const GROQ = process.env.GROQ_API_KEY, CLAUDE = process.env.ANTHROPIC_API_KEY;
 const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-const GROQ_VISION = process.env.GROQ_VISION_MODEL || ""; // set to a Groq model that reads images to allow pictures on Groq
+const GROQ_VISION = process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b"; // Groq's model that reads images
 const hasAI = !!(GROQ || CLAUDE);
 const canSee = !!(CLAUDE || (GROQ && GROQ_VISION));
 
-async function callGroq(text, image) {
-  const content = image
-    ? [{ type: "text", text: PROMPT(text, true) }, { type: "image_url", image_url: { url: `data:${image.type};base64,${image.data}` } }]
-    : PROMPT(text, false);
+async function groq(model, content) {
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${GROQ}` },
-    body: JSON.stringify({ model: image ? GROQ_VISION : GROQ_MODEL, max_tokens: 400, messages: [{ role: "user", content }] }),
+    body: JSON.stringify({ model, max_tokens: 1024, messages: [{ role: "user", content }] }),
   });
-  if (!res.ok) throw new Error("Groq call failed: " + res.status);
+  if (!res.ok) throw new Error(`Groq ${model} failed: ${res.status}`);
   return (await res.json()).choices?.[0]?.message?.content || "";
+}
+
+async function callGroq(text, image) {
+  if (image) return groq(GROQ_VISION, [
+    { type: "text", text: PROMPT(text, true) },
+    { type: "image_url", image_url: { url: `data:${image.type};base64,${image.data}` } },
+  ]);
+  // If the text model is unavailable on this account, try the other Groq model before giving up.
+  try { return await groq(GROQ_MODEL, PROMPT(text, false)); }
+  catch (e) { console.error(e); return groq(GROQ_VISION, PROMPT(text, false)); }
 }
 
 async function callClaude(text, image) {
@@ -87,13 +94,15 @@ export async function POST(req) {
     return Response.json({ error: "Picture checks need the AI judge, which is not switched on yet. Paste the text instead." }, { status: 503 });
   if (!allowed(ip)) return Response.json({ error: `You have used your ${LIMIT} checks for today. Come back tomorrow.` }, { status: 429 });
 
+  let why = hasAI ? "" : "no AI key is set on the server";
   if (hasAI) {
     const img = canSee ? image : null; // drop the picture if no AI here can read it
     if (text || img) {
       try { return Response.json({ ...(await aiScore(text, img)), source: "ai", note: image && !img ? "Scored on your text only. Picture checks are not switched on." : undefined }); }
-      catch (e) { console.error(e); }
+      catch (e) { console.error(e); why = String(e.message || e).slice(0, 120); }
     }
   }
-  if (!text) return Response.json({ error: "The AI judge could not read that picture. Try again or paste the text." }, { status: 502 });
-  return Response.json({ ...localScore(text), source: "basic", note: image ? "Scored on your text only. The picture needs the AI judge." : undefined });
+  // The reason is shown on the page so a failed AI call is easy to diagnose.
+  if (!text) return Response.json({ error: `The AI judge could not check that picture (${why}). Try again or paste the text.` }, { status: 502 });
+  return Response.json({ ...localScore(text), source: "basic", note: image ? `Scored on your text only. The picture was not checked (${why}).` : hasAI ? `Basic check used (${why}).` : undefined });
 }

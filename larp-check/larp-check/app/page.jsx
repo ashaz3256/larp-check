@@ -35,7 +35,12 @@ export default function Home() {
     const file = e.target.files?.[0];
     e.target.value = ""; // lets the same picture be chosen again
     if (!file) return;
-    try { setImg(await shrink(file)); setNote("Picture added. Press Check my larp."); }
+    try {
+      setImg(await shrink(file));
+      // Clear a leftover example bio so only the picture gets judged
+      if (EX.some(([, t]) => t === text)) setText("");
+      setNote("Picture added. Press Check my larp.");
+    }
     catch (err) { setNote(err.message || "That picture could not be opened. Try a JPEG or PNG."); }
   }
 
